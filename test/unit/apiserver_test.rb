@@ -21,38 +21,8 @@ class ApiServerTest < Minitest::Test
     assert_equal [:create], kube_apiserver.action
   end
 
-  def test_default_admission_control_is_always_admit
-    assert_equal 'AlwaysAdmit', kube_apiserver.admission_control
-  end
-
-  def test_can_set_a_single_admission_control_plugin
-    plugins = 'ResourceQuota'
-    kube_apiserver.admission_control plugins
-    assert_equal plugins, kube_apiserver.admission_control
-  end
-
-  def test_can_set_multiple_admission_control_plugins
-    plugins = %w(ResourceQuota ServiceAccount)
-    kube_apiserver.admission_control plugins
-    assert_equal plugins, kube_apiserver.admission_control
-  end
-
-  def test_default_admission_control_config_file_is_nil
-    assert_nil kube_apiserver.admission_control_config_file
-  end
-
-  def test_accepts_a_string_for_admission_control_file
-    kube_apiserver.admission_control_config_file '/etc/some-file'
-    assert_equal '/etc/some-file', kube_apiserver.admission_control_config_file
-  end
-
-  def test_default_advertise_address_is_nil
-    assert_nil kube_apiserver.advertise_address
-  end
-
-  def test_accepts_an_ipaddress_string_for_advertise_address
-    kube_apiserver.advertise_address '127.0.0.1'
-    assert_equal '127.0.0.1', kube_apiserver.advertise_address
+  def test_default_options_is_a_hash
+    assert_equal({}, kube_apiserver.options)
   end
 end
 
@@ -103,11 +73,14 @@ class ActionStartTest < Minitest::Test
   include Provider
 
   def test_passes_apiserver_command_to_systemd_unit
+    provider do
+      options an_option: 'some-value'
+    end
     provider.action_start
     unit = provider.inline_resources.find 'template[/etc/systemd/system'\
         '/kube-apiserver.service]'
 
     command = unit.variables[:kube_apiserver_command]
-    assert_equal '/usr/sbin/kube-apiserver', command
+    assert_equal '/usr/sbin/kube-apiserver --an-option=some-value', command
   end
 end
