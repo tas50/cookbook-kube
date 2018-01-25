@@ -3,17 +3,15 @@ module KubernetesCookbook
   class KubeProxy < Chef::Resource
     resource_name :kube_proxy
 
-    property :version, String, default: '1.7.6'
+    property :version, String, default: '1.9.2'
     property :remote, String,
       default: lazy { |r|
         'https://storage.googleapis.com/kubernetes-release' \
         "/release/v#{r.version}/bin/linux/amd64/kube-proxy"
       }
     property :checksum, String,
-      default: 'f9298a5b9e0a9fe3891f7a35bc13c012f1d9530f8a755b9038d3810873a2a843'
+      default: '27d1eba7d4b0c4a52e15c217b688ad0610e044357dfd8db81fe7fa8d41f2a895'
     property :file_ulimit, Integer, default: 65536
-
-    default_action :create
 
     action :create do
       remote_file "kube-proxy binary version: #{new_resource.version}" do
@@ -66,7 +64,8 @@ module KubernetesCookbook
   class KubeProxy
     property :azure_container_registry_config
     property :bind_address, default: '0.0.0.0'
-    property :cleanup_iptables
+    property :cleanup
+    property :cleanup_ipvs, default: true
     property :cluster_cidr
     property :config
     property :config_sync_period, default: '15m0s'
@@ -82,18 +81,22 @@ module KubernetesCookbook
     property :iptables_masquerade_bit, default: 14
     property :iptables_min_sync_period
     property :iptables_sync_period, default: '30s'
+    property :ipvs_min_sync_period
+    property :ipvs_scheduler
+    property :ipvs_sync_period, default: '30s'
     property :kube_api_burst, default: 10
     property :kube_api_content_type, default: 'application/vnd.kubernetes.protobuf'
     property :kube_api_qps, default: 5
     property :kubeconfig
     property :masquerade_all
     property :master, required: true
+    property :metrics_bind_address, default: '127.0.0.1:10249'
     property :oom_score_adj, default: -999
-    property :proxy_mode
     property :profiling
     property :proxy_mode
     property :proxy_port_range
     property :udp_timeout, default: '250ms'
+    property :write_config_to
 
     property :v, default: 0
   end
