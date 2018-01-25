@@ -57,6 +57,7 @@ kubelet_service 'default' do
   pod_cidr '10.180.1.0/24'
   cluster_dns '10.0.0.10'
   cluster_domain 'cluster.local'
+  fail_swap_on false
   action %w(create start)
 end
 
