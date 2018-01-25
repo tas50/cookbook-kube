@@ -43,8 +43,12 @@ module KubernetesCookbook
         only_if { new_resource.run_user == 'kubernetes' }
       end
 
-      directory '/var/run/kubernetes' do
+      directory ::File.dirname(new_resource.kubeconfig) do
         owner new_resource.run_user
+        group 'root'
+        mode '0750'
+        recursive true
+        action :create
       end
 
       template '/etc/tmpfiles.d/kubernetes.conf' do
@@ -70,6 +74,13 @@ module KubernetesCookbook
           WantedBy: 'multi-user.target',
         },
       }
+
+      # kubeconfig *has* to be specified on kubelets now that api-servers can't be set via
+      # the command line. Not sure why they took away that, but they did. This allows us
+      # to set it even if it's just the default which we normally ignore in CLI options
+      unless /--kubeconfig/ =~ systemd_contents[:Service][:ExecStart]
+        systemd_contents[:Service][:ExecStart] << " --kubeconfig=#{new_resource.kubeconfig}"
+      end
 
       systemd_unit 'kubelet.service' do
         content(systemd_contents)
