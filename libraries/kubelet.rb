@@ -5,19 +5,17 @@ module KubernetesCookbook
   class KubeletService < Chef::Resource
     resource_name :kubelet_service
 
-    property :version, String, default: '1.7.6'
+    property :version, String, default: '1.9.2'
     property :remote, String,
       default: lazy { |r|
         'https://storage.googleapis.com/kubernetes-release' \
         "/release/v#{r.version}/bin/linux/amd64/kubelet"
       }
     property :checksum, String,
-      default: '6178cb17d3c34ebe31dfc572d17ae077ce19d2a936bbe90999bac87ebf6e06eb'
+      default: '56dd720c239987a2a30ea1c2ae0497788efab0477c0198f592decc74d6a0364a'
     property :container_runtime_service, String, default: 'docker.service'
     property :run_user, String, default: 'kubernetes'
     property :file_ulimit, Integer, default: 65536
-
-    default_action :create
 
     action :create do
       remote_file "kubelet binary version: #{new_resource.version}" do
@@ -99,7 +97,6 @@ module KubernetesCookbook
   class KubeletService
     property :address, default: '0.0.0.0'
     property :allow_privileged, default: false
-    property :api_servers
     property :anonymous_auth, default: true
     property :authentication_token_webhook
     property :authentication_token_webhook_cache_ttl, default: '2m0s'
@@ -107,9 +104,10 @@ module KubernetesCookbook
     property :authorization_webhook_cache_authorized_ttl, default: '5m0s'
     property :authorization_webhook_cache_unauthorized_ttl, default: '30s'
     property :azure_container_registry_config
+    property :bootstrap_checkpoint_path
     property :bootstrap_kubeconfig
     property :cadvisor_port, default: 4_194
-    property :cert_dir, default: '/var/run/kubernetes'
+    property :cert_dir, default: '/var/lib/kubelet/pki'
     property :cgroup_driver, default: 'cgroupfs'
     property :cgroup_root, default: ''
     property :cgroups_per_qos, default: true
@@ -125,10 +123,13 @@ module KubernetesCookbook
     property :container_runtime_endpoint, default: 'unix:///var/run/dockershim.sock'
     property :containerized, default: false
     property :cpu_cfs_quota, default: true
+    property :cpu_manager_policy, default: 'none'
+    property :cpu_manager_reconcile_period, default: '10s'
     property :contention_profiling
     property :cpu_cfs_quota, default: true
     property :docker_disable_shared_pid
     property :docker_endpoint, default: 'unix:///var/run/docker.sock'
+    property :dynamic_config_dir
     property :enable_controller_attach_detach, default: true
     property :enable_controller_attach_detach
     property :enable_custom_metrics, default: false
@@ -148,10 +149,10 @@ module KubernetesCookbook
     property :experimental_allowed_unsafe_sysctls, default: []
     property :experimental_bootstrap_kubeconfig
     property :experimental_check_node_capabilities_before_mount
-    property :experimental_fail_swap_on
     property :experimental_kernel_memcg_notification
     property :experimental_mounter_path
     property :experimental_qos_reserved
+    property :fail_swap_on, default: true
     property :feature_gates
     property :file_check_frequency, default: '20s'
     property :google_json_key
@@ -167,9 +168,9 @@ module KubernetesCookbook
     property :image_gc_low_threshold, default: 80
     property :image_pull_progress_deadline, default: '1m0s'
     property :image_service_endpoint
+    property :init_config_dir
     property :iptables_drop_bit, default: 15
     property :iptables_masquerade_bit, default: 14
-    property :keep_terminated_pod_volumes
     property :kube_api_burst, default: 10
     property :kube_api_content_type, default: 'application/vnd.kubernetes.protobuf'
     property :kube_api_qps, default: 5
@@ -204,11 +205,9 @@ module KubernetesCookbook
     property :register_with_taints, default: false
     property :registry_burst, default: 10
     property :registry_qps, default: 5
-    property :require_kubeconfig
     property :resolv_conf, default: '/etc/resolv.conf'
     property :rkt_api_endpoint, default: 'localhost:15441'
     property :rkt_path
-    property :rkt_stage1_image
     property :root_dir, default: '/var/lib/kubelet'
     property :runonce
     property :runtime_cgroups
