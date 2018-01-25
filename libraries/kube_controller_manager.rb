@@ -5,18 +5,16 @@ module KubernetesCookbook
   class KubeControllerManager < Chef::Resource
     resource_name :kube_controller_manager
 
-    property :version, String, default: '1.7.6'
+    property :version, String, default: '1.9.2'
     property :remote, String,
       default: lazy { |r|
         'https://storage.googleapis.com/kubernetes-release' \
         "/release/v#{r.version}/bin/linux/amd64/kube-controller-manager"
       }
     property :checksum, String,
-      default: 'ec1c6fada5a4d5136678f25e35d273cb3f871a50ed9b06fad6b9d08ab12153ed'
+      default: '12f800b56500d2d5d1289e2d158a9fee0eacfad2f48fc77043f76a744b1f8716'
     property :run_user, String, default: 'kubernetes'
     property :file_ulimit, Integer, default: 65536
-
-    default_action :create
 
     action :create do
       remote_file "kube-controller-manager version: #{new_resource.version}" do
@@ -109,6 +107,7 @@ module KubernetesCookbook
     property :google_json_key
     property :horizontal_pod_autoscaler_downscale_delay, default: '5m0s'
     property :horizontal_pod_autoscaler_sync_period, default: '30s'
+    property :horizontal_pod_autoscaler_tolerance, default: 0.1
     property :horizontal_pod_autoscaler_upscale_delay, default: '3m0s'
     property :horizontal_pod_autoscaler_use_rest_clients
     property :insecure_experimental_approve_all_kubelet_csrs_for_group
@@ -122,7 +121,6 @@ module KubernetesCookbook
     property :leader_elect_renew_deadline, default: '10s'
     property :leader_elect_resource_lock, default: 'endpoints'
     property :leader_elect_retry_period, default: '2s'
-    property :log_flush_frequency, default: '5s'
     property :master, required: true
     property :min_resync_period, default: '12h0m0s'
     property :namespace_sync_period, default: '5m0s'
