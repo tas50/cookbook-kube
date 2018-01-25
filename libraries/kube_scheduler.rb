@@ -3,18 +3,16 @@ module KubernetesCookbook
   class KubeScheduler < Chef::Resource
     resource_name :kube_scheduler
 
-    property :version, String, default: '1.7.6'
+    property :version, String, default: '1.9.2'
     property :remote, String,
       default: lazy { |r|
         'https://storage.googleapis.com/kubernetes-release' \
         "/release/v#{r.version}/bin/linux/amd64/kube-scheduler"
       }
     property :checksum, String,
-      default: '391b105aa43143120960c7be8312b6685f2008ea5c21e1360610c1677752549c'
+      default: '593fa5dc99614ed85be25d800cc90d82552135b28cd92de0f3f19f967fb532fd'
     property :run_user, String, default: 'kubernetes'
     property :file_ulimit, Integer, default: 65536
-
-    default_action :create
 
     action :create do
       remote_file "kube-scheduler binary version: #{new_resource.version}" do
@@ -74,6 +72,7 @@ module KubernetesCookbook
     property :address, default: '0.0.0.0'
     property :algorithm_provider, default: 'DefaultProvider'
     property :azure_container_registry_config
+    property :config
     property :contention_profiling
     property :feature_gates
     property :google_json_key
